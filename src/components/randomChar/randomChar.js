@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import './randomChar.css';
 import gotService  from '../../services/gotService';
 import Spinner from '../spinner';
+import ErrorMessage from '../errorMessage';
 
 export default class RandomChar extends Component {
     constructor() {
@@ -19,27 +20,38 @@ export default class RandomChar extends Component {
     onCharLoaded = (char) => {
         this.setState({
             char,
+            loading:false,
+            error: false
+        })
+    }
+    onError = (err) => {
+        this.setState({
+            error: true,
             loading:false
         })
     }
 
     updateChar() {
+        // const id = 1000000
         const id = Math.floor(Math.random()*180+25); //от25 - до180
         this.gotService.getCharacter(id)
             .then(this.onCharLoaded)
+            .catch(this.onError);
     }
 
     render() {
 
-        const { char, loading} = this.state;
+        const { char, loading, error} = this.state;
 
+        const errorMessage = error ? <ErrorMessage/> : null;
         const spinner = loading ? <Spinner/> : null;
-        const content = !loading ? <View char={char}/> : null;
+        const content = !(loading || error) ? <View char={char}/> : null;
         // const content = loading ? <Spinner/> : <View char={char}/>
-        //более сокращеный код
+        //более короткий код, но нельзя проверить на ошибку 
  
         return (
             <div className="random-block rounded">
+                {errorMessage}
                 {spinner}
                 {content}
             </div>
